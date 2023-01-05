@@ -1,7 +1,7 @@
 import * as twgl from "twgl.js";
 import laserFrag from "./lazer.frag";
 import laserVert from "./lazer.vert";
-const gl = (document.getElementById("root") as HTMLCanvasElement)?.getContext(
+const gl = (document.getElementById("root") as HTMLCanvasElement).getContext(
   "webgl2"
 )!;
 const programInfo = twgl.createProgramInfo(gl, [laserVert, laserFrag]);
