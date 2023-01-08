@@ -103,7 +103,7 @@ void main()
     
     vec3 color = vec3(0.);
     
-    float scale = 0.06;
+    float scale = 0.10;
     
 
     f = 0.;
