@@ -1,5 +1,6 @@
 #version 300 es
-#define PI 3.14159265358979
+#define TAU 6.283185307179586
+#define GOLDEN 1.618033988749894
 precision mediump float;
 
 uniform float iTime;
@@ -25,67 +26,61 @@ float distToLine(vec2 st, vec2 a, vec2 b)
     float t = clamp(dot(ab, aToST) / dot(ab, ab), 0., 1.);
     float d = length(a + ab * t - st);
     
-    //doing some fudging to achieve the falloff line look for vectrex
-    //d /= t * 1.;
+    
     
     return d;
 }
 
 float getLine(vec2 st, vec2 start, vec2 end)
 {
-    float jitterIntensity = 0.001;
+    float jitterIntensity =  0.001;
     float jitter = Hash(sin(iTime * 250.)) * jitterIntensity;
     
     float f = 0.;
     float dist2Line = distToLine(st, start, end) + jitter;
     
-    f = (0.01 / (dist2Line));
+    f = (0.01 / (dist2Line)) ;
     
     f *= 0.1;
     
     return clamp(f, 0., 1.);
 }
 
-vec3 rotX(vec3 b, float d)
+mat3 rotX(float d)
 {
-    mat3 A = mat3(
+    return mat3(
         cos(d),	-sin(d), 	0.,
         sin(d), cos(d), 	0.,
         0., 	1., 		0.
-        );
-    
-    vec3 result = (A * b);
-    return result;
+        ); 
 }
 
-vec3 rotY(vec3 b, float d)
+mat3 rotY(float d)
 {
-    mat3 A = mat3(
+    return mat3(
         cos(d), 		0., 	sin(d), 
         0., 			1., 	0., 
         -sin(d), 		0., 	cos(d)
         );
     
-    vec3 result = (A * b);
-    return result;
+   
 }
 
-vec3 rotZ(vec3 b, float d)
+mat3 rotZ(float d)
 {
-    mat3 A = mat3(
+    return mat3(
         0., 	1., 		0.,
         0.,		cos(d),		sin(d),
         0.,		-sin(d), 	cos(d)
         );
     
-    vec3 result = (A * b);
-    return result;
+    
 }
 
 vec2 pToS(vec3 p)
 {
-    p = rotY(p, iTime);
-    
+     
+    p = p *  rotY(iTime * 0.4) * rotX(0.50);
     vec3 pCenter = vec3(-0., 0., 1.0);
     p += pCenter;
     
@@ -107,60 +102,92 @@ void main()
     float iTime = iTime * 1.0;
     
     vec3 color = vec3(0.);
-	
-    float deg = iTime * PI * 0.25;
-    float halfPI = PI * 0.5;
-	f = getLine(st, 
-                vec2(0.5, 0.5) + vec2(cos(deg), sin(deg)), 
-                vec2(0.5, 0.5) + vec2(cos(deg + PI), sin(deg + PI))
-                );
+    
+    float scale = 0.06;
+    
+
     f = 0.;
     
     
     
-    float scale = 0.05 + sin(iTime) * 0.01 + 0.05;
-    
     vec3[] p = vec3[](
-        (vec3(-scale, -scale, -scale)),
-    	(vec3(-scale,  scale, -scale)),
-        (vec3( scale,  scale, -scale)),
-    	(vec3( scale, -scale, -scale)),
+        vec3(1, 1, 1) * scale,
+        vec3(-1, 1, 1) * scale,
+        vec3(-1, -1, 1) * scale,
+        vec3(-1, -1, -1) * scale,
         
-        (vec3(-scale, -scale, scale)),
-    	(vec3(-scale,  scale, scale)),
-     	(vec3( scale,  scale, scale)),
-        (vec3( scale, -scale, scale))
+        
+        vec3(-1, 1, -1) * scale,
+        vec3(1, -1, -1) * scale,
+        vec3(1, -1, 1) * scale,
+        vec3(1, 1, -1) * scale,
+
+        vec3(0, GOLDEN, 1./GOLDEN) * scale,
+        vec3(0, -GOLDEN, 1./GOLDEN) * scale,
+        vec3(0, -GOLDEN, -1./GOLDEN) * scale,
+        vec3(0, GOLDEN, -1./GOLDEN) * scale,
+
+        vec3(GOLDEN, 1./GOLDEN, 0) * scale,
+        vec3(-GOLDEN, 1./GOLDEN, 0) * scale,
+        vec3(-GOLDEN, -1./GOLDEN, 0) * scale,
+        vec3(GOLDEN, -1./GOLDEN, 0) * scale,
+
+        vec3(1./GOLDEN, 0, GOLDEN) * scale,
+        vec3(1./GOLDEN, 0, -GOLDEN) * scale,
+        vec3( -1./GOLDEN, 0, GOLDEN) * scale,
+        vec3( -1./GOLDEN, 0, -GOLDEN) * scale
     );
     
-    vec2[8] p_;
-    for (int i = 0 ; i < 8; ++i)
+    vec2[40] p_;
+    for (int i = 0 ; i < 40; ++i)
     {
         p_[i] = pToS(p[i]);
     }
     
-    const int k_edgeMax = 8 * 3;
+
     int[] edges = int[](
-        0, 1,
-        1, 2,
-        2, 3,
-        3, 0,
+        0,8,
+        8,1,
+        1,18,
+        18,16,
+        16,0,
+
+        5,10,
+        10,3,
+        3,19,
+        19,17,
+        17,5,
+
+        0,12,
+        12,15,
+        15,6,
+        6,16,
+
+        4,13,
+        13,14,
+        14,3,
+        4, 19,
+        2,18,
+        2, 9,
+        9, 10,
+        2, 14,
+
+        11, 4,
+        11, 7,
+        7, 12,
         
-        4, 5,
-        5, 6,
-        6, 7,
-        7, 4,
+        5,15,
+        13,1,
+        11,8,
+        7,17,
+        9, 6
         
-        //Draw connecting lines
-        0, 4,
-        1, 5,
-        2, 6,
-        3, 7
     );
     
-    for (int i = 0; i < k_edgeMax; i += 2)
+    for (int i = 0; i < edges.length(); i += 2)
     {
         const float jitterIntensity = 0.003;//pow(sin(iTime), 3.);
-        const float halfJitter = jitterIntensity * 0.5;
+        const float halfJitter = jitterIntensity * 0.25;
         vec2 randPointA = vec2(Hash(iTime + float(i + 34)), Hash(iTime + float(i + 3424))) * jitterIntensity - halfJitter;
         vec2 randPointB = vec2(Hash(iTime + float(i * 2 + 34)), Hash(iTime + float(i * 24))) * jitterIntensity - halfJitter;
         
@@ -179,7 +206,7 @@ void main()
     
     
     
-    float gamma = 0.59;
+    float gamma = 0.7;
     color = vec3(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma));
     
 	fragColor = vec4(color, 1.0);
