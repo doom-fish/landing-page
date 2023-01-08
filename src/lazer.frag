@@ -80,7 +80,7 @@ mat3 rotZ(float d)
 vec2 pToS(vec3 p)
 {
      
-    p = p *  rotY(iTime * 0.4) * rotX(0.50);
+    p = p *  rotY(iTime * 0.4) * rotX(0.4);
     vec3 pCenter = vec3(-0., 0., 1.0);
     p += pCenter;
     
