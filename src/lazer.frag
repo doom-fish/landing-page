@@ -80,7 +80,7 @@ mat3 rotZ(float d)
 vec2 pToS(vec3 p)
 {
      
-    p = p *  rotY(iTime * 0.4) * rotX(0.4);
+    p = p *  rotY(0.36) ;
     vec3 pCenter = vec3(-0., 0., 1.0);
     p += pCenter;
     
@@ -103,7 +103,7 @@ void main()
     
     vec3 color = vec3(0.);
     
-    float scale = 0.06;
+    float scale = 0.18;
     
 
     f = 0.;
