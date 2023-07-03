@@ -46,12 +46,12 @@ float getLine(vec2 st, vec2 start, vec2 end)
     return clamp(f, 0., 1.);
 }
 
-mat3 rotX(float d)
+mat3 rotZ(float d)
 {
     return mat3(
         cos(d),	-sin(d), 	0.,
         sin(d), cos(d), 	0.,
-        0., 	1., 		0.
+        0., 	0, 		1.
         ); 
 }
 
@@ -66,10 +66,10 @@ mat3 rotY(float d)
    
 }
 
-mat3 rotZ(float d)
+mat3 rotX(float d)
 {
     return mat3(
-        0., 	1., 		0.,
+        1., 	0., 		0.,
         0.,		cos(d),		sin(d),
         0.,		-sin(d), 	cos(d)
         );
@@ -79,12 +79,12 @@ mat3 rotZ(float d)
 
 vec2 pToS(vec3 p)
 {
+    p = p *   rotY(iTime * 0.4)  * rotX(0.05);
      
-    p = p *  rotY(iTime * 0.4) * rotX(0.4);
-    vec3 pCenter = vec3(-0., 0., 1.0);
-    p += pCenter;
     
-    return vec2(p.x / p.z, p.y / p.z);
+    
+    
+    return vec2(p.x, p.y);
 }
 
 //================================================================================
@@ -102,8 +102,10 @@ void main()
     float iTime = iTime * 1.0;
     
     vec3 color = vec3(0.);
+
+    vec3 translate = vec3(-0,-0.1,0);
     
-    float scale = 0.10;
+    float scale = 0.30;
     
 
     f = 0.;
@@ -111,77 +113,65 @@ void main()
     
     
     vec3[] p = vec3[](
-        vec3(1, 1, 1) * scale,
-        vec3(-1, 1, 1) * scale,
-        vec3(-1, -1, 1) * scale,
-        vec3(-1, -1, -1) * scale,
+        (vec3(-0.60, cos(iTime) * 0.01,  0.60) * scale) + translate,
+        (vec3(-0.60, cos(iTime) * 0.01, -0.60) * scale) + translate,
+        (vec3(0.60, cos(iTime) * 0.01, -0.60) * scale) + translate,
+        (vec3(0.60, cos(iTime) * 0.01,  0.60) * scale) + translate,
+        (vec3(0, 1.0 + cos(iTime) * 0.01,  0) * scale) + translate
+        
+
+
+        // (vec3(2, 0, 0) * scale) + translate,
+        // (vec3(2, 0, 2) * scale) + translate,
+        // (vec3(0, 0, 2) * scale) + translate,
+        // (vec3(1, -1.5, 1) * scale) + translate
         
         
-        vec3(-1, 1, -1) * scale,
-        vec3(1, -1, -1) * scale,
-        vec3(1, -1, 1) * scale,
-        vec3(1, 1, -1) * scale,
+        
+        
+        
+        
+        
 
-        vec3(0, GOLDEN, 1./GOLDEN) * scale,
-        vec3(0, -GOLDEN, 1./GOLDEN) * scale,
-        vec3(0, -GOLDEN, -1./GOLDEN) * scale,
-        vec3(0, GOLDEN, -1./GOLDEN) * scale,
-
-        vec3(GOLDEN, 1./GOLDEN, 0) * scale,
-        vec3(-GOLDEN, 1./GOLDEN, 0) * scale,
-        vec3(-GOLDEN, -1./GOLDEN, 0) * scale,
-        vec3(GOLDEN, -1./GOLDEN, 0) * scale,
-
-        vec3(1./GOLDEN, 0, GOLDEN) * scale,
-        vec3(1./GOLDEN, 0, -GOLDEN) * scale,
-        vec3( -1./GOLDEN, 0, GOLDEN) * scale,
-        vec3( -1./GOLDEN, 0, -GOLDEN) * scale
+        
+        
+        
+        
     );
     
     vec2[40] p_;
-    for (int i = 0 ; i < 40; ++i)
+    for (int i = 0 ; i < p_.length(); ++i)
     {
         p_[i] = pToS(p[i]);
     }
     
 
     int[] edges = int[](
-        0,8,
-        8,1,
-        1,18,
-        18,16,
-        16,0,
+        0,1,
+        1,2,
+        2,3,
+        3,0,
+        // 1,2,
+        // 2,3,
+        // 3,0,
+        0,4,
+        1,4,
+        2,4,
+        3,4
 
-        5,10,
-        10,3,
-        3,19,
-        19,17,
-        17,5,
-
-        0,12,
-        12,15,
-        15,6,
-        6,16,
-
-        4,13,
-        13,14,
-        14,3,
-        4, 19,
-        2,18,
-        2, 9,
-        9, 10,
-        2, 14,
-
-        11, 4,
-        11, 7,
-        7, 12,
         
-        5,15,
-        13,1,
-        11,8,
-        7,17,
-        9, 6
+
+        // 1,5,
+        // 0,5,
+        // 3,5,
+        // 4,5
+
+
         
+        
+        
+        
+
     );
     
     for (int i = 0; i < edges.length(); i += 2)
@@ -201,12 +191,12 @@ void main()
     
     //Color
     //vec3 color = vec3(.05, 1., .1);
-    color += vec3(0.8, 0., 0.) * f ;
+    color += vec3(1, 1, 0) * f ;
     
     
     
     
-    float gamma = 0.7;
+    float gamma = 1.5;
     color = vec3(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma));
     
 	fragColor = vec4(color, 1.0);
