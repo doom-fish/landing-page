@@ -16,21 +16,18 @@
         text-align: center;
       }
       #root {
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 0;
+      
+        width: 1024px;
+        height: 720px;
+        
       }
-      .text {
-        margin-top: 15vh;
-        position: relative;
-        max-width: 50%;
-      }
+      
     </style>
   </head>
   <body>
+    <input type="range" step="0.1" min="0" max="4" value="0" id="intensity" />
     <canvas id="root"></canvas>
-    <img class="text" alt="doom.fish.industries" src="/text.png" />
+    
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

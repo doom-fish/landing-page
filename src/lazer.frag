@@ -4,21 +4,26 @@
 precision mediump float;
 
 uniform float iTime;
+uniform float intensity;
 uniform vec2 iResolution;
 
 out vec4 fragColor;
 
-//--------------------------------------------------------------------------------
-//  1 out, 1 in...
-#define HASHSCALE .1031
-float Hash(float p)
-{
-	vec3 p3  = fract(vec3(p) * HASHSCALE);
-    p3 += dot(p3, p3.yzx + 19.19);
-    return fract((p3.x + p3.y) * p3.z);
+mat2 rotate2d(float angle){
+    return mat2(cos(angle),-sin(angle),
+                sin(angle),cos(angle));
 }
 
-
+float variation1(vec2 v1, vec2 v2, float strength, float speed) {
+	return cos(
+        dot(normalize(v1), normalize(v2)) * strength + iTime * speed
+    ) / 100.0;
+}
+float variation2(vec2 v1, vec2 v2, float strength, float speed) {
+	return sin(
+        dot(normalize(v1), normalize(v2)) * strength + iTime * speed
+    ) / 100.0;
+}
 float distToLine(vec2 st, vec2 a, vec2 b)
 {
 	vec2 ab = b - a;
@@ -27,17 +32,14 @@ float distToLine(vec2 st, vec2 a, vec2 b)
     float d = length(a + ab * t - st);
     
     
-    
     return d;
 }
 
 float getLine(vec2 st, vec2 start, vec2 end)
 {
-    float jitterIntensity =  0.001;
-    float jitter = Hash(sin(iTime * 250.)) * jitterIntensity;
     
     float f = 0.;
-    float dist2Line = distToLine(st, start, end) + jitter;
+    float dist2Line = distToLine(st, start, end) ;
     
     f = (0.01 / (dist2Line)) ;
     
@@ -46,168 +48,69 @@ float getLine(vec2 st, vec2 start, vec2 end)
     return clamp(f, 0., 1.);
 }
 
-mat3 rotX(float d)
+float sdTriangle( in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2 )
 {
-    return mat3(
-        cos(d),	-sin(d), 	0.,
-        sin(d), cos(d), 	0.,
-        0., 	1., 		0.
-        ); 
+	vec2 e0 = p1 - p0;
+	vec2 e1 = p2 - p1;
+	vec2 e2 = p0 - p2;
+
+	vec2 v0 = p - p0;
+	vec2 v1 = p - p1;
+	vec2 v2 = p - p2;
+
+	vec2 pq0 = v0 - e0*clamp( dot(v0,e0)/dot(e0,e0), 0.0, 1.0 );
+	vec2 pq1 = v1 - e1*clamp( dot(v1,e1)/dot(e1,e1), 0.0, 1.0 );
+	vec2 pq2 = v2 - e2*clamp( dot(v2,e2)/dot(e2,e2), 0.0, 1.0 );
+    
+    float s = e0.x*e2.y - e0.y*e2.x;
+    vec2 d = min( min( vec2( dot( pq0, pq0 ), s*(v0.x*e0.y-v0.y*e0.x) ),
+                       vec2( dot( pq1, pq1 ), s*(v1.x*e1.y-v1.y*e1.x) )),
+                       vec2( dot( pq2, pq2 ), s*(v2.x*e2.y-v2.y*e2.x) ));
+
+	return -sqrt(d.x)*sign(d.y);
 }
 
-mat3 rotY(float d)
-{
-    return mat3(
-        cos(d), 		0., 	sin(d), 
-        0., 			1., 	0., 
-        -sin(d), 		0., 	cos(d)
-        );
+
+vec3 paintCircle (vec2 uv, vec2 center, float rad, float width) {
     
-   
+    vec2 diff = center-uv;
+    float scale = 0.5;
+    float len = sdTriangle(uv, vec2(0.0, 0.0) * scale, vec2(0.0, 1.0) * scale, vec2(0.8, 0.5) * scale);
+
+    len += variation2(diff, vec2(0.0, 0.0) * scale, 5.0, 2.0) *  intensity;
+    len -= variation2(diff, vec2(1.0, 0.0) * scale, 5.0, 2.0) * intensity;
+    
+    float circle = smoothstep(rad, rad-width, len) - smoothstep(rad, rad, len);
+    return vec3(circle);
 }
 
-mat3 rotZ(float d)
-{
-    return mat3(
-        0., 	1., 		0.,
-        0.,		cos(d),		sin(d),
-        0.,		-sin(d), 	cos(d)
-        );
-    
-    
-}
 
-vec2 pToS(vec3 p)
-{
-     
-    p = p *  rotY(iTime * 0.4) * rotX(0.4);
-    vec3 pCenter = vec3(-0., 0., 1.0);
-    p += pCenter;
-    
-    return vec2(p.x / p.z, p.y / p.z);
-}
-
-//================================================================================
-void main()
+void main( )
 {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
-    float aspect = iResolution.x/iResolution.y;
-	uv.x *= aspect;
-	vec2 st = uv;
-    st -= vec2(0.5 * aspect, 0.5);
+    uv.x *= 1.5;
+    uv.x -= 0.6;
+    uv.y -= 0.25;
     
-   
-	float f;
     
-    float iTime = iTime * 1.0;
     
-    vec3 color = vec3(0.);
-    
-    float scale = 0.10;
+    vec3 color;
+    float radius = 0.001;
+    vec2 center = vec2(0.5);
     
 
-    f = 0.;
+    
+     
+    //paint color circle
+    color = paintCircle(uv, center, radius  , 0.0);
+     
+    //color with gradient
     
     
+    //paint white circle
+    color += paintCircle(uv, center, radius , 0.);
+    color *= vec3(0., 0.5, 0.);
     
-    vec3[] p = vec3[](
-        vec3(1, 1, 1) * scale,
-        vec3(-1, 1, 1) * scale,
-        vec3(-1, -1, 1) * scale,
-        vec3(-1, -1, -1) * scale,
-        
-        
-        vec3(-1, 1, -1) * scale,
-        vec3(1, -1, -1) * scale,
-        vec3(1, -1, 1) * scale,
-        vec3(1, 1, -1) * scale,
-
-        vec3(0, GOLDEN, 1./GOLDEN) * scale,
-        vec3(0, -GOLDEN, 1./GOLDEN) * scale,
-        vec3(0, -GOLDEN, -1./GOLDEN) * scale,
-        vec3(0, GOLDEN, -1./GOLDEN) * scale,
-
-        vec3(GOLDEN, 1./GOLDEN, 0) * scale,
-        vec3(-GOLDEN, 1./GOLDEN, 0) * scale,
-        vec3(-GOLDEN, -1./GOLDEN, 0) * scale,
-        vec3(GOLDEN, -1./GOLDEN, 0) * scale,
-
-        vec3(1./GOLDEN, 0, GOLDEN) * scale,
-        vec3(1./GOLDEN, 0, -GOLDEN) * scale,
-        vec3( -1./GOLDEN, 0, GOLDEN) * scale,
-        vec3( -1./GOLDEN, 0, -GOLDEN) * scale
-    );
-    
-    vec2[40] p_;
-    for (int i = 0 ; i < 40; ++i)
-    {
-        p_[i] = pToS(p[i]);
-    }
-    
-
-    int[] edges = int[](
-        0,8,
-        8,1,
-        1,18,
-        18,16,
-        16,0,
-
-        5,10,
-        10,3,
-        3,19,
-        19,17,
-        17,5,
-
-        0,12,
-        12,15,
-        15,6,
-        6,16,
-
-        4,13,
-        13,14,
-        14,3,
-        4, 19,
-        2,18,
-        2, 9,
-        9, 10,
-        2, 14,
-
-        11, 4,
-        11, 7,
-        7, 12,
-        
-        5,15,
-        13,1,
-        11,8,
-        7,17,
-        9, 6
-        
-    );
-    
-    for (int i = 0; i < edges.length(); i += 2)
-    {
-        const float jitterIntensity = 0.003;//pow(sin(iTime), 3.);
-        const float halfJitter = jitterIntensity * 0.25;
-        vec2 randPointA = vec2(Hash(iTime + float(i + 34)), Hash(iTime + float(i + 3424))) * jitterIntensity - halfJitter;
-        vec2 randPointB = vec2(Hash(iTime + float(i * 2 + 34)), Hash(iTime + float(i * 24))) * jitterIntensity - halfJitter;
-        
-        vec2 pointA = p_[edges[i]] + randPointA;
-        vec2 pointB = p_[edges[i + 1]] + randPointB;
-        
-        f += getLine(st, pointA, pointB);
-              
-        
-    }
-    
-    //Color
-    //vec3 color = vec3(.05, 1., .1);
-    color += vec3(0.8, 0., 0.) * f ;
-    
-    
-    
-    
-    float gamma = 0.7;
-    color = vec3(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma));
     
 	fragColor = vec4(color, 1.0);
 }

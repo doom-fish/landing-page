@@ -15,6 +15,8 @@ function render(time: number) {
 
   const uniforms = {
     iTime: time * 0.001,
+    intensity:
+      +(document.getElementById("intensity") as HTMLInputElement)?.value ?? 0,
     iResolution: [gl.canvas.width, gl.canvas.height],
   };
 
