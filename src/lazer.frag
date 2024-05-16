@@ -69,28 +69,40 @@ float sdTriangle( in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2 )
 
 	return -sqrt(d.x)*sign(d.y);
 }
-
+float sdCircle( vec2 p, float r )
+{
+    return length(p) - r;
+}
 
 vec3 paintCircle (vec2 uv, vec2 center, float rad, float width) {
     
     vec2 diff = center-uv;
     float scale = 0.5;
-    float len = sdTriangle(uv, vec2(0.0, 0.0) * scale, vec2(0.0, 1.0) * scale, vec2(0.8, 0.5) * scale);
+    vec2 triOffset = vec2(0.4,0.5);
+    vec2 circleOffset = vec2(-0.13,0.);
+    float tri = sdTriangle(uv, center *triOffset + vec2(0.0, 0.0) * scale, center * triOffset +  vec2(0.0, 1.0) * scale, center * triOffset + vec2(0.8, 0.5) * scale);
+    float circle = sdCircle(circleOffset +diff, 0.2);
 
-    len += variation2(diff, vec2(0.0, 0.0) * scale, 5.0, 2.0) *  intensity;
-    len -= variation2(diff, vec2(1.0, 0.0) * scale, 5.0, 2.0) * intensity;
+    tri += variation2(diff, vec2(1.0, 0.0), 5.0, 2.0) *  intensity * 0.5;
+    tri -= variation2(diff, vec2(0.0, 1.0), 5.0, 2.0) * intensity*0.5;
+    circle += variation2(circleOffset+ diff, vec2(1.0, 0.0), 5.0, 2.0) *  intensity*0.5;
+    circle -= variation2(circleOffset+diff, vec2(0.0, 1.0), 5.0, 2.0) * intensity*0.5;
     
-    float circle = smoothstep(rad, rad-width, len) - smoothstep(rad, rad, len);
-    return vec3(circle);
+    float dist = mix(tri, circle, intensity*0.3);
+    // float dist = tri;
+    
+    float result = smoothstep(rad - width, rad, dist) - smoothstep(rad, rad + width, dist);
+    
+    return vec3(result);
 }
 
 
 void main( )
 {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
-    uv.x *= 1.5;
-    uv.x -= 0.6;
-    uv.y -= 0.25;
+    
+    // uv.x -= 0.40;
+    
     
     
     
@@ -102,13 +114,13 @@ void main( )
     
      
     //paint color circle
-    color = paintCircle(uv, center, radius  , 0.0);
+    color = paintCircle(uv, center, radius  , 0.05);
      
     //color with gradient
     
     
     //paint white circle
-    color += paintCircle(uv, center, radius , 0.);
+    color += paintCircle(uv, center, radius , 0.005);
     color *= vec3(0., 0.5, 0.);
     
     
