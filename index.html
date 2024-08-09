@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,9 +9,15 @@
       #root,
       html,
       body {
+        background: url("/image.webp");
+        background-size: cover;
+        background-position:
+          center center,
+          0px 0px;
+        background-repeat: no-repeat;
         margin: 0;
-        background: #000;
         width: 100%;
+        image-rendering: pixelated;
         height: 100%;
         text-align: center;
       }
@@ -30,7 +36,6 @@
   </head>
   <body>
     <canvas id="root"></canvas>
-    <img class="text" alt="doom.fish.industries" src="/text.png" />
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
