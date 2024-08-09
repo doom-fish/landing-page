@@ -72,9 +72,9 @@ mat3 rotZ(float d)
 
 vec2 pToS(vec3 p)
 {
-    p = p * rotY(iTime * 0.4);
-    p = p * rotX(iTime * 0.4);
-    p = p * rotZ(iTime * 0.4);
+    p = p * rotY(iTime * 0.2);
+    p = p * rotX(iTime * 0.2);
+    p = p * rotZ(iTime * 0.2);
 
     vec3 pCenter = vec3(-0., 0., 1.0);
     p += pCenter;
@@ -88,7 +88,7 @@ void main()
 
     //p.x -= mod(p.x, 1.0 / 32.);
     //p.y -= mod(p.y, 1.0 / 32.);
-    float pixelSize = max(1., 16. - exp(iTime * 0.2) * 2.);
+    float pixelSize = max(1., 24. - exp(iTime * 1.5) * 1.5);
     vec2 screenSpace = vec2(gl_FragCoord.x, gl_FragCoord.y);
     vec2 fullUV = screenSpace / iResolution.xy;
     vec2 uv = floor(fullUV * (iResolution / pixelSize)) / iResolution * pixelSize;
@@ -96,7 +96,7 @@ void main()
 
     uv.x *= aspect;
     vec2 st = uv;
-    st -= vec2(0.5 * aspect, 0.60);
+    st -= vec2(0.50 * aspect, 0.5);
 
     float f;
 
@@ -104,7 +104,7 @@ void main()
 
     vec4 color = vec4(0.);
 
-    float scale = 0.10;
+    float scale = 0.09;
 
     f = 0.;
 
@@ -195,11 +195,11 @@ void main()
 
     //Color
     //vec3 color = vec3(.05, 1., .1);
-    color += vec4(0.93, 0., 0.0, 1.) * f;
+    color += vec4(0.3, 0., 0.0, 1.) * f;
 
-    float gamma = 0.4;
+    float gamma = 0.25;
 
-    color = vec4(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma), pow(color.x, gamma) * 1.4);
+    color = vec4(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma), pow(color.x, gamma) * 1.8);
 
     fragColor = color;
 }

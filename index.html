@@ -9,18 +9,20 @@
       #root,
       html,
       body {
-        background-color: #000;
-        background: url("/image.webp");
-        background-size: cover;
-        background-position:
-          center center,
-          0px 0px;
-        background-repeat: no-repeat;
         margin: 0;
         width: 100%;
         image-rendering: pixelated;
         height: 100%;
         text-align: center;
+      }
+      body {
+        background-color: #000;
+        background-image: url("/image.webp");
+        background-size: cover;
+        background-position:
+          center center,
+          0px 0px;
+        background-repeat: no-repeat;
       }
       #root {
         position: absolute;
@@ -28,6 +30,20 @@
         left: 0;
         z-index: 0;
       }
+      img {
+        background-blend-mode: multiply;
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+        position: fixed;
+        top: 0px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.4;
+        filter: invert(90%);
+      }
+
       .text {
         margin-top: 15vh;
         position: relative;
@@ -37,6 +53,7 @@
   </head>
   <body>
     <canvas id="root"></canvas>
+    <img src="/logo2.png" />
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
