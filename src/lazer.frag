@@ -88,7 +88,7 @@ void main()
 
     //p.x -= mod(p.x, 1.0 / 32.);
     //p.y -= mod(p.y, 1.0 / 32.);
-    float pixelSize = max(1., 16. - exp(iTime * 0.2));
+    float pixelSize = max(1., 16. - exp(iTime * 0.2) * 2.);
     vec2 screenSpace = vec2(gl_FragCoord.x, gl_FragCoord.y);
     vec2 fullUV = screenSpace / iResolution.xy;
     vec2 uv = floor(fullUV * (iResolution / pixelSize)) / iResolution * pixelSize;
@@ -96,13 +96,13 @@ void main()
 
     uv.x *= aspect;
     vec2 st = uv;
-    st -= vec2(0.5 * aspect, 0.5);
+    st -= vec2(0.5 * aspect, 0.60);
 
     float f;
 
     float iTime = iTime * 1.0;
 
-    vec3 color = vec3(0.);
+    vec4 color = vec4(0.);
 
     float scale = 0.10;
 
@@ -182,7 +182,7 @@ void main()
 
     for (int i = 0; i < edges.length(); i += 2)
     {
-        const float jitterIntensity = 0.003; //pow(sin(iTime), 3.);
+        const float jitterIntensity = 0.005;
         const float halfJitter = jitterIntensity * 0.25;
         vec2 randPointA = vec2(Hash(iTime + float(i + 34)), Hash(iTime + float(i + 3424))) * jitterIntensity - halfJitter;
         vec2 randPointB = vec2(Hash(iTime + float(i * 2 + 34)), Hash(iTime + float(i * 24))) * jitterIntensity - halfJitter;
@@ -195,11 +195,11 @@ void main()
 
     //Color
     //vec3 color = vec3(.05, 1., .1);
-    color += vec3(0.83, 0.0, 0.0) * f;
+    color += vec4(0.93, 0., 0.0, 1.) * f;
 
-    float gamma = 0.5;
+    float gamma = 0.4;
 
-    color = vec3(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma));
+    color = vec4(pow(color.x, gamma), pow(color.y, gamma), pow(color.z, gamma), pow(color.x, gamma) * 1.4);
 
-    fragColor = vec4(color, 0.95);
+    fragColor = color;
 }
