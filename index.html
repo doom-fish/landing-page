@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>doom.fish.industries</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       #root,
       html,
       body {
@@ -31,17 +34,8 @@
         z-index: 0;
       }
       img {
-        background-blend-mode: multiply;
-        width: 100%;
-        max-width: 400px;
-        margin: auto;
-        position: fixed;
-        top: 0px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        opacity: 0.4;
-        filter: invert(90%);
+        aspect-ratio: 1 /1;
+        max-height: 80vmin;
       }
 
       .text {
@@ -53,7 +47,7 @@
   </head>
   <body>
     <canvas id="root"></canvas>
-    <img src="/logo2.png" />
+    <img src="/unmasked.png" />
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -30,13 +30,12 @@ float distToLine(vec2 st, vec2 a, vec2 b)
 float getLine(vec2 st, vec2 start, vec2 end)
 {
     float jitterIntensity = 0.01;
-    float jitter = Hash(sin(iTime * 250.)) * jitterIntensity;
+    float jitter = Hash(sin(iTime * 5.)) * jitterIntensity;
 
     float f = 0.;
     float dist2Line = distToLine(st, start, end) + jitter;
 
-    f = (0.01 / (dist2Line));
-    f += (0.01 / (dist2Line));
+    f = (0.02 / (dist2Line));
 
     f *= 0.1;
 
@@ -72,9 +71,9 @@ mat3 rotZ(float d)
 
 vec2 pToS(vec3 p)
 {
-    p = p * rotY(iTime * 0.2);
-    p = p * rotX(iTime * 0.2);
-    p = p * rotZ(iTime * 0.2);
+    p = p * rotY(sin(iTime * 0.3));
+    p = p * rotX(cos(iTime * 0.4));
+    p = p * rotZ(iTime * 0.4);
 
     vec3 pCenter = vec3(-0., 0., 1.0);
     p += pCenter;
@@ -88,7 +87,7 @@ void main()
 
     //p.x -= mod(p.x, 1.0 / 32.);
     //p.y -= mod(p.y, 1.0 / 32.);
-    float pixelSize = max(1., 24. - exp(iTime * 1.5) * 1.5);
+    float pixelSize = max(1., 10. - exp(iTime * 0.8) * 0.7);
     vec2 screenSpace = vec2(gl_FragCoord.x, gl_FragCoord.y);
     vec2 fullUV = screenSpace / iResolution.xy;
     vec2 uv = floor(fullUV * (iResolution / pixelSize)) / iResolution * pixelSize;
@@ -104,7 +103,7 @@ void main()
 
     vec4 color = vec4(0.);
 
-    float scale = 0.09;
+    float scale = cos(iTime) * 0.01 + 0.13;
 
     f = 0.;
 
@@ -182,14 +181,13 @@ void main()
 
     for (int i = 0; i < edges.length(); i += 2)
     {
-        const float jitterIntensity = 0.005;
-        const float halfJitter = jitterIntensity * 0.25;
+        const float jitterIntensity = 0.0005;
+        const float halfJitter = jitterIntensity * 0.05;
         vec2 randPointA = vec2(Hash(iTime + float(i + 34)), Hash(iTime + float(i + 3424))) * jitterIntensity - halfJitter;
         vec2 randPointB = vec2(Hash(iTime + float(i * 2 + 34)), Hash(iTime + float(i * 24))) * jitterIntensity - halfJitter;
 
         vec2 pointA = p_[edges[i]] + randPointA;
         vec2 pointB = p_[edges[i + 1]] + randPointB;
-
         f += getLine(st, pointA, pointB);
     }
 
